@@ -2,12 +2,23 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
 use App\Repository\FavRepository;
+use ApiPlatform\Metadata\Get;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: FavRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(
+            uriTemplate: '/users/{id}/favs',
+            security: "is_granted('ROLE_USER') and object.id == user.id", // Assurer que seul l'utilisateur connecté peut voir ses favoris
+            securityMessage: 'Accès interdit.'
+        )
+    ]
+)]
 class Fav
 {
     #[ORM\Id]

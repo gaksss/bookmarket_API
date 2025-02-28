@@ -2,12 +2,29 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
 use App\Repository\BookStateRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: BookStateRepository::class)]
+#[ApiResource(
+    
+    operations: [
+        new Get(
+            normalizationContext: ['groups' => ['bookState:read']],
+            security: "is_granted('PUBLIC_ACCESS')"
+        ),
+        new GetCollection(
+            normalizationContext: ['groups' => ['bookState:read']],
+            security: "is_granted('PUBLIC_ACCESS')"
+        ),
+        ]
+)]
 class BookState
 {
     #[ORM\Id]
@@ -16,7 +33,11 @@ class BookState
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['bookState:read'])]
     private ?string $state = null;
+
+
+
 
     /**
      * @var Collection<int, Book>

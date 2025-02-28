@@ -82,28 +82,34 @@ class Book
 
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['book:read', 'book:write'])]
     private ?Author $author = null;
 
     /**
      * @var Collection<int, Img>
      */
     #[ORM\OneToMany(targetEntity: Img::class, mappedBy: 'book')]
+    #[Groups(['book:read', 'book:write'])]
     private Collection $img;
 
     #[ORM\ManyToOne(inversedBy: 'books')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Groups(['book:read', 'book:write'])]
     private ?Pro $seller = null;
 
     #[ORM\ManyToOne(inversedBy: 'books')]
+    #[Groups(['book:read', 'book:write'])]
     private ?BookState $bookState = null;
 
     #[ORM\OneToOne(mappedBy: 'book', cascade: ['persist', 'remove'])]
+    #[Groups(['book:read', 'book:write'])]
     private ?Sales $sales = null;
 
     /**
      * @var Collection<int, Fav>
      */
     #[ORM\OneToMany(targetEntity: Fav::class, mappedBy: 'book')]
+    #[Groups(['book:read', 'book:write'])]
     private Collection $favs;
 
     public function __construct()

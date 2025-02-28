@@ -2,23 +2,60 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Repository\AuthorRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AuthorRepository::class)]
+#[ApiResource(
+    security: "is_granted('AUTHOR_CREATE', object)",
+    operations: [
+        new Get(
+            normalizationContext: ['groups' => ['author:read']],
+            security: "is_granted('PUBLIC_ACCESS')"
+        ),
+        new GetCollection(
+            normalizationContext: ['groups' => ['author:read']],
+            security: "is_granted('PUBLIC_ACCESS')"
+        ),
+        new Post(
+            denormalizationContext: ['groups' => ['author:write']],
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "Seuls les utilisateurs admin peuvent créer des auteurs"
+        ),
+        new Patch(
+            denormalizationContext: ['groups' => ['author:write']],
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "Seuls les utilisateurs admin peuvent modifier des auteurs"
+        ),
+        new Delete(
+            security: "is_granted('ROLE_ADMIN')",
+            securityMessage: "Seuls les utilisateurs admin peuvent supprimer des auteurs"
+        ),
+    ]
+)]
 class Author
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['author:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['author:read', "author:write"])]
     private ?string $lastname = null;
 
     #[ORM\Column(length: 255)]
+    #[Groups(['author:read', "author:write"])]
     private ?string $firstname = null;
 
     /**
