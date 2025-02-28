@@ -56,9 +56,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Book::class, mappedBy: 'user')]
     private Collection $books;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?Pro $pro = null;
+
+    /**
+     * @var Collection<int, Sales>
+     */
+    #[ORM\OneToMany(targetEntity: Sales::class, mappedBy: 'user')]
+    private Collection $sales;
+
+    /**
+     * @var Collection<int, Fav>
+     */
+    #[ORM\ManyToMany(targetEntity: Fav::class, mappedBy: 'user')]
+    private Collection $favs;
+
+    #[ORM\Column(length: 255)]
+    private ?string $lastname = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $firstname = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $phone = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pp_path = null;
+
     public function __construct()
     {
         $this->books = new ArrayCollection();
+        $this->sales = new ArrayCollection();
+        $this->favs = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -162,6 +191,133 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $book->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getPro(): ?Pro
+    {
+        return $this->pro;
+    }
+
+    public function setPro(?Pro $pro): static
+    {
+        // unset the owning side of the relation if necessary
+        if ($pro === null && $this->pro !== null) {
+            $this->pro->setUser(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($pro !== null && $pro->getUser() !== $this) {
+            $pro->setUser($this);
+        }
+
+        $this->pro = $pro;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Sales>
+     */
+    public function getSales(): Collection
+    {
+        return $this->sales;
+    }
+
+    public function addSale(Sales $sale): static
+    {
+        if (!$this->sales->contains($sale)) {
+            $this->sales->add($sale);
+            $sale->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSale(Sales $sale): static
+    {
+        if ($this->sales->removeElement($sale)) {
+            // set the owning side to null (unless already changed)
+            if ($sale->getUser() === $this) {
+                $sale->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Fav>
+     */
+    public function getFavs(): Collection
+    {
+        return $this->favs;
+    }
+
+    public function addFav(Fav $fav): static
+    {
+        if (!$this->favs->contains($fav)) {
+            $this->favs->add($fav);
+            $fav->addUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFav(Fav $fav): static
+    {
+        if ($this->favs->removeElement($fav)) {
+            $fav->removeUser($this);
+        }
+
+        return $this;
+    }
+
+    public function getLastname(): ?string
+    {
+        return $this->lastname;
+    }
+
+    public function setLastname(string $lastname): static
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    public function getFirstname(): ?string
+    {
+        return $this->firstname;
+    }
+
+    public function setFirstname(string $firstname): static
+    {
+        $this->firstname = $firstname;
+
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(?string $phone): static
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
+
+    public function getPpPath(): ?string
+    {
+        return $this->pp_path;
+    }
+
+    public function setPpPath(?string $pp_path): static
+    {
+        $this->pp_path = $pp_path;
 
         return $this;
     }
